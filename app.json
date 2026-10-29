@@ -1,0 +1,38 @@
+{
+  "expo": {
+    "name": "Cardap Gar\u00e7om",
+    "slug": "cardap-garcom",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "userInterfaceStyle": "light",
+    "scheme": "cardapgarcom",
+    "ios": {
+      "supportsTablet": true,
+      "bundleIdentifier": "com.cardap.garcom",
+      "infoPlist": {
+        "ITSAppUsesNonExemptEncryption": false
+      }
+    },
+    "android": {
+      "package": "com.cardap.garcom",
+      "predictiveBackGestureEnabled": false
+    },
+    "web": {
+      "bundler": "metro",
+      "favicon": "./assets/branding/cardap-garcom-icon.png"
+    },
+    "plugins": [
+      "expo-font",
+      [
+        "expo-navigation-bar",
+        {
+          "enforceContrast": false,
+          "hidden": false,
+          "style": "dark"
+        }
+      ],
+      "expo-status-bar"
+    ],
+    "icon": "./assets/branding/cardap-garcom-icon.png"
+  }
+}

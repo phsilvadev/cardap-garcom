@@ -1,0 +1,3 @@
+Built-in image generation tool.
+
+Use case: logo-brand. Create ONE square app icon for Cardap Garçom, matching the Cardap family of minimal black and golden yellow apps. Full-bleed uniform flat golden yellow #FFBF00 square background, no rounded outside corners. The ONLY black symbol is a simple elegant serving cloche on a tray held by a minimal stylized hand, side profile. Bold iconic silhouette with a single clean negative-space separation between tray and dome. Centered, generous margins, instantly readable at tiny mobile icon size, crisp vector-like edges, black #0A0A0A only. No text, no letters, no person, no helmet, no motorcycle, no extra decorative symbols, no gradient, no texture, no shadow, no mockup, no watermark.
