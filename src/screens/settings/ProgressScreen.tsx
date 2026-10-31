@@ -2,27 +2,27 @@ import { View } from 'react-native';
 import { Screen } from '@/components/Screen';
 import { PageHeader } from '@/components/PageHeader';
 import { AppText } from '@/components/ui/AppText';
-import { PreviewNote } from '@/components/PreviewNote';
-import { useWaiterDemo } from '@/contexts/WaiterDemoContext';
+import { SalonSyncStatus } from '@/components/SalonSyncStatus';
+import { useWaiter } from '@/contexts/WaiterContext';
 export function ProgressScreen() {
-  const { state } = useWaiterDemo();
+  const { state } = useWaiter();
   const served = state.orders.filter(
     (order) => order.status === 'served',
   ).length;
   return (
     <Screen>
       <PageHeader
-        title="Meu atendimento."
+        title="Atendimento do salão."
         description="Cada mesa faz parte da sua rotina."
       />
-      <PreviewNote />
+      <SalonSyncStatus />
       <View className="mt-6 rounded-3xl bg-brand p-6">
         <AppText variant="label">Pedidos servidos</AppText>
         <AppText variant="title" className="mt-3 text-4xl">
           {served}
         </AppText>
         <AppText variant="muted" className="mt-2 text-ink">
-          No período de exemplo
+          Nas comandas atuais do restaurante
         </AppText>
       </View>
       {[
@@ -32,7 +32,9 @@ export function ProgressScreen() {
         ],
         [
           'Pedidos em preparo',
-          state.orders.filter((order) => order.status === 'preparing').length,
+          state.orders.filter((order) =>
+            ['new', 'preparing'].includes(order.status),
+          ).length,
         ],
         [
           'Prontos para servir',

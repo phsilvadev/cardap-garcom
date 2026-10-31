@@ -2,10 +2,10 @@ import { Pressable, TextInput, View } from 'react-native';
 import { ChevronRight, Search, UsersRound } from 'lucide-react-native';
 import { Screen } from '@/components/Screen';
 import { AppText } from '@/components/ui/AppText';
-import { PreviewNote } from '@/components/PreviewNote';
+import { SalonSyncStatus } from '@/components/SalonSyncStatus';
 import { useTables } from '@/hooks/use-tables';
 import { useAppNavigation } from '@/hooks/useAppNavigation';
-import { money } from '@/mocks/waiter';
+import { money } from '@/utils/salon-state';
 export function TablesScreen() {
   const control = useTables();
   const navigation = useAppNavigation();
@@ -20,7 +20,7 @@ export function TablesScreen() {
       <AppText variant="muted" className="mt-2">
         Abra uma comanda e cuide de cada atendimento.
       </AppText>
-      <PreviewNote />
+      <SalonSyncStatus />
       <View className="mb-4 mt-6 flex-row items-center gap-3 rounded-2xl border border-line px-4">
         <Search size={19} color="#666666" />
         <TextInput
@@ -32,11 +32,12 @@ export function TablesScreen() {
           onChangeText={control.setSearch}
         />
       </View>
-      <View className="mb-5 flex-row gap-2">
+      <View className="mb-5 flex-row flex-wrap gap-2">
         {[
           { id: 'all', label: 'Todas' },
           { id: 'occupied', label: 'Em atendimento' },
           { id: 'free', label: 'Livres' },
+          { id: 'cleaning', label: 'Limpeza' },
         ].map((filter) => (
           <Pressable
             key={filter.id}
@@ -54,6 +55,12 @@ export function TablesScreen() {
         ))}
       </View>
       <View className="gap-4">
+        {!control.loading && !control.visible.length && (
+          <AppText variant="muted">
+            Nenhuma mesa encontrada. As mesas são cadastradas no painel do
+            restaurante.
+          </AppText>
+        )}
         {control.visible.map((table) => (
           <Pressable
             key={table.id}
@@ -70,20 +77,24 @@ export function TablesScreen() {
                 className={`rounded-full px-3 py-1 ${table.active ? 'bg-brand-50' : 'bg-green-50'}`}
               >
                 <AppText variant="muted" className="text-xs text-ink">
-                  {table.checkout
-                    ? 'Conta solicitada'
-                    : table.active
-                      ? 'Em atendimento'
-                      : 'Livre'}
+                  {table.cleaning
+                    ? 'Aguardando limpeza'
+                    : table.checkout
+                      ? 'Conta solicitada'
+                      : table.active
+                        ? 'Em atendimento'
+                        : 'Livre'}
                 </AppText>
               </View>
             </View>
             <View className="mt-4 flex-row items-center gap-2">
               <UsersRound size={17} color="#666666" />
               <AppText variant="muted" className="flex-1">
-                {table.active
-                  ? `${table.guests} pessoas · ${money(table.total)}`
-                  : 'Pronta para receber clientes'}
+                {table.cleaning
+                  ? 'Confirme a limpeza para liberar a mesa'
+                  : table.active
+                    ? `${table.guests} pessoas · ${money(table.total)}`
+                    : 'Pronta para receber clientes'}
               </AppText>
               <ChevronRight size={19} color="#0A0A0A" />
             </View>

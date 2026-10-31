@@ -10,7 +10,7 @@ import { Screen } from '@/components/Screen';
 import { Brand } from '@/components/Brand';
 import { AppText } from '@/components/ui/AppText';
 import { AppButton } from '@/components/ui/AppButton';
-import { PreviewNote } from '@/components/PreviewNote';
+import { SalonSyncStatus } from '@/components/SalonSyncStatus';
 import { useAuth } from '@/contexts/AuthContext';
 import { useTables } from '@/hooks/use-tables';
 import { useAppNavigation } from '@/hooks/useAppNavigation';
@@ -49,7 +49,7 @@ export function HomeScreen() {
           Da mesa direto para a cozinha, com cada detalhe no lugar.
         </AppText>
       </View>
-      <PreviewNote />
+      <SalonSyncStatus />
       <View className="my-7 flex-row gap-5 border-b border-line pb-6">
         <View className="flex-1">
           <UsersRound size={22} color="#0A0A0A" />

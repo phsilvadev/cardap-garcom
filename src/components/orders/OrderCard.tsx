@@ -1,12 +1,8 @@
+import type { SalonOrder } from '@/types/salon';
 import { View } from 'react-native';
 import { AppText } from '@/components/ui/AppText';
 import { AppButton } from '@/components/ui/AppButton';
-import {
-  money,
-  orderTotal,
-  orderStatuses,
-  type SalonOrder,
-} from '@/mocks/waiter';
+import { money, orderTotal, orderStatuses } from '@/utils/salon-state';
 export function OrderCard({
   order,
   tableName,

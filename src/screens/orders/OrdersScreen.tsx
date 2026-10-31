@@ -4,10 +4,10 @@ import { Screen } from '@/components/Screen';
 import { AppText } from '@/components/ui/AppText';
 import { AppButton } from '@/components/ui/AppButton';
 import { BaseBottomSheet } from '@/components/BaseBottomSheet';
-import { PreviewNote } from '@/components/PreviewNote';
+import { SalonSyncStatus } from '@/components/SalonSyncStatus';
 import { OrderCard } from '@/components/orders/OrderCard';
 import { useOrders } from '@/hooks/use-orders';
-import { money, orderTotal, orderStatuses } from '@/mocks/waiter';
+import { money, orderTotal, orderStatuses } from '@/utils/salon-state';
 export function OrdersScreen() {
   const control = useOrders();
   return (
@@ -22,7 +22,7 @@ export function OrdersScreen() {
         <AppText variant="muted" className="mt-2">
           Acompanhe o preparo e veja o que já pode ser servido.
         </AppText>
-        <PreviewNote />
+        <SalonSyncStatus />
         <View className="my-6 flex-row items-center justify-between">
           <AppText variant="muted">{control.items.length} pedidos</AppText>
           <AppButton
@@ -136,8 +136,7 @@ export function OrdersScreen() {
               Total: {money(orderTotal(control.selected))}
             </AppText>
             <AppText variant="muted" className="mb-5">
-              Demonstração local. Marcar um pedido como servido não fecha a
-              conta da mesa.
+              Marcar um pedido como servido não fecha a conta da mesa.
             </AppText>
             <AppButton
               label="Fechar"
@@ -158,7 +157,12 @@ export function OrdersScreen() {
               Pedido #{control.serving.id}. Confirme que todos os itens foram
               servidos. A comanda continuará aberta.
             </AppText>
-            <AppButton label="Confirmar servido" onPress={control.serve} />
+            <SalonSyncStatus />
+            <AppButton
+              label="Confirmar servido"
+              disabled={control.disabled}
+              onPress={control.serve}
+            />
             <AppButton
               label="Cancelar"
               variant="secondary"

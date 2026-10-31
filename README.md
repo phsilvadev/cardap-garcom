@@ -14,22 +14,28 @@ O proprietário cadastra o funcionário com cargo Garçom no painel e usa Libera
 
 Backend no projeto `cardap-clear`, codebase `employee-access`: `employeeCreateWaiter`, `employeeEnableWaiterAccess`, `waiterGetSession`. Verifique o status de publicação nesse projeto.
 
-## Demonstração de atendimento
+## Atendimento integrado ao salão
 
-Mesas, cardápio, comandas e pedidos usam dados locais de exemplo. A operação **ainda não envia pedidos para a central real**, não consulta o cardápio real e não altera pagamentos no Firebase.
+Mesas, comandas, cardápio e pedidos usam a mesma função `salonOperations` e o mesmo projeto Firebase do painel do restaurante. O aplicativo não cria mesas nem pedidos de exemplo. Configure as variáveis de `.env.example` em `.env` com os valores públicos do aplicativo Firebase do projeto `cardap-e0bf0`.
 
-- Início com restaurante autenticado, mesas em atendimento e pedidos prontos de exemplo.
-- Mesas com busca e filtros; abertura de mesa com quantidade de pessoas.
-- Comanda com várias rodadas de pedidos e total dos itens.
-- Novo pedido com categorias, busca, quantidades e observações; revisão em bottom sheet e envio simulado para a cozinha.
-- Pedidos em preparo, prontos e servidos; detalhes e confirmações em bottom sheets separados.
-- Meu atendimento, conta, perfil e ajuda.
+O backend fica em `cardcap-clear/firebase/employee-access`. É necessário que `salonOperations` e `waiterGetSession` estejam publicadas na região `southamerica-east1`. A loja deve estar configurada ou ativa, ter a operação Salão habilitada e o funcionário deve ter cargo Garçom, vínculo ativo e acesso liberado. O servidor determina a loja pelo vínculo do usuário e rejeita acesso cruzado.
 
-Pedidos enviados na demonstração entram em preparo. O garçom marca pedidos prontos como servidos. Isso **não fecha a comanda**. A solicitação da conta ao caixa é liberada após servir todos os pedidos da mesa. Pagamento e encerramento são responsabilidade do caixa. O estado de demonstração permanece entre telas e é reiniciado ao trocar de usuário/loja ou reiniciar o app.
+- Mesas e cardápio são consultados na entrada, a cada 5 segundos enquanto o app estiver ativo e ao voltar do segundo plano.
+- Abertura de mesa, envio à cozinha, confirmação de serviço, solicitação de conta e confirmação de limpeza são gravados no backend.
+- Categorias, preços e disponibilidade vêm do cardápio da loja. O servidor calcula o preço final e verifica os produtos novamente no envio. Produtos com personalização obrigatória aparecem identificados e bloqueados, pois o contrato atual do salão ainda não aceita essas opções.
+- A solicitação de conta aparece no painel do caixa depois que os pedidos forem servidos ou cancelados. Pagamentos, descontos e encerramento continuam sob responsabilidade do caixa.
+- Após o caixa encerrar a conta, a mesa fica aguardando limpeza. O garçom confirma a limpeza para liberar outro atendimento.
+- A tela Atendimento do salão mostra as comandas atuais do restaurante, não um histórico individual de produtividade.
+
+### Conexão e envios pendentes
+
+Não há gravações offline otimistas. Se uma leitura falhar, o aplicativo informa o erro e bloqueia novas operações até conseguir atualizar. Se um envio ficar sem resposta, ele é preservado no AsyncStorage antes da chamada, separado por usuário e loja, sem credenciais. Use **Confirmar envio pendente**: o app repete exatamente o mesmo identificador e os mesmos dados, aproveitando a idempotência do backend para evitar duplicação. A pendência também é recuperada após reiniciar o aplicativo. Dados de uma sessão descartada não são reutilizados por outra conta.
+
+Nenhuma Function ou regra é publicada por iniciar o aplicativo. A publicação do backend exige autenticação e permissão no projeto Firebase.
 
 ## Validação
 
-`npm run typecheck` verifica tipos. Os bundles Expo e testes de navegação não substituem uma conferência no aparelho físico. Nenhuma publicação nas lojas ou repositório remoto é feita automaticamente.
+`npm test` verifica adaptação dos dados reais, isolamento entre contas, persistência de envios, falhas de rede e reenvio idempotente. `npm run typecheck` verifica tipos. `npx expo export --platform web` e `npx expo export --platform android` validam os bundles. Os testes automatizados não substituem uma conferência no aparelho físico. Nenhuma publicação nas lojas ou repositório remoto é feita automaticamente.
 
 ## Identidade visual
 

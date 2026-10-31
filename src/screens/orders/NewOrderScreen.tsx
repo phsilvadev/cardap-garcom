@@ -6,15 +6,17 @@ import { PageHeader } from '@/components/PageHeader';
 import { AppText } from '@/components/ui/AppText';
 import { AppButton } from '@/components/ui/AppButton';
 import { BaseBottomSheet } from '@/components/BaseBottomSheet';
+import { SalonSyncStatus } from '@/components/SalonSyncStatus';
 import { useNewOrder } from '@/hooks/use-new-order';
-import { money } from '@/mocks/waiter';
+import { money } from '@/utils/salon-state';
 import type { RootStackParamList } from '@/types/navigation';
 export function NewOrderScreen() {
   const { params } = useRoute<RouteProp<RootStackParamList, 'NewOrder'>>();
   const control = useNewOrder(params.tableId);
-  if (!control.table?.active || control.table.checkout)
+  if (!control.canOrder || !control.table)
     return (
       <Screen>
+        <SalonSyncStatus />
         <PageHeader
           title="Comanda indisponível."
           description="Abra uma mesa disponível para adicionar pedidos."
@@ -28,6 +30,7 @@ export function NewOrderScreen() {
           title="Novo pedido."
           description={`${control.table.name} · Selecione os itens e envie para a cozinha.`}
         />
+        <SalonSyncStatus />
         <TextInput
           accessibilityLabel="Buscar produto"
           placeholder="Buscar no cardápio"
@@ -41,24 +44,28 @@ export function NewOrderScreen() {
           showsHorizontalScrollIndicator={false}
           contentContainerClassName="gap-2 py-5"
         >
-          {['Todos', 'Lanches', 'Pratos', 'Porções', 'Bebidas'].map(
-            (category) => (
-              <Pressable
-                accessibilityRole="button"
-                key={category}
-                onPress={() => control.setCategory(category)}
-                className={`min-h-11 justify-center rounded-full border px-4 ${category === control.category ? 'border-ink bg-ink' : 'border-line'}`}
+          {control.categories.map((category) => (
+            <Pressable
+              accessibilityRole="button"
+              key={category}
+              onPress={() => control.setCategory(category)}
+              className={`min-h-11 justify-center rounded-full border px-4 ${category === control.category ? 'border-ink bg-ink' : 'border-line'}`}
+            >
+              <AppText
+                variant="label"
+                className={category === control.category ? 'text-white' : ''}
               >
-                <AppText
-                  variant="label"
-                  className={category === control.category ? 'text-white' : ''}
-                >
-                  {category}
-                </AppText>
-              </Pressable>
-            ),
-          )}
+                {category}
+              </AppText>
+            </Pressable>
+          ))}
         </ScrollView>
+        {!control.visible.length && (
+          <AppText variant="muted">
+            Nenhum produto disponível neste filtro. Confira o cardápio no
+            painel.
+          </AppText>
+        )}
         <View className="gap-5">
           {control.visible.map((product) => (
             <View key={product.id} className="border-b border-line pb-5">
@@ -68,6 +75,12 @@ export function NewOrderScreen() {
               <AppText variant="muted" className="mt-1">
                 {product.description}
               </AppText>
+              {product.requiresCustomization && (
+                <AppText variant="muted" className="mt-2 text-xs">
+                  Este produto exige personalização e ainda não pode ser enviado
+                  por este app.
+                </AppText>
+              )}
               <View className="mt-4 flex-row items-center justify-between">
                 <AppText variant="label" className="font-semibold">
                   {money(product.price)}
@@ -76,7 +89,9 @@ export function NewOrderScreen() {
                   <Pressable
                     accessibilityRole="button"
                     accessibilityLabel={`Remover ${product.name}`}
-                    disabled={!control.quantities[product.id]}
+                    disabled={
+                      control.disabled || !control.quantities[product.id]
+                    }
                     onPress={() => control.change(product.id, -1)}
                     className="h-10 w-10 items-center justify-center rounded-full border border-line"
                   >
@@ -88,6 +103,7 @@ export function NewOrderScreen() {
                   <Pressable
                     accessibilityRole="button"
                     accessibilityLabel={`Adicionar ${product.name}`}
+                    disabled={control.disabled || product.requiresCustomization}
                     onPress={() => control.change(product.id, 1)}
                     className="h-10 w-10 items-center justify-center rounded-full bg-brand"
                   >
@@ -118,7 +134,7 @@ export function NewOrderScreen() {
         </View>
         <AppButton
           label="Revisar e enviar"
-          disabled={!control.count}
+          disabled={control.disabled || !control.count}
           onPress={control.review}
         />
       </Screen>
@@ -149,9 +165,15 @@ export function NewOrderScreen() {
           Total: {money(control.total)}
         </AppText>
         <AppText variant="muted" className="mb-5 text-xs">
-          Demonstração local. Nenhum pedido real será enviado.
+          Os itens serão enviados à cozinha da sua loja. Preços e
+          disponibilidade são conferidos pelo sistema.
         </AppText>
-        <AppButton label="Enviar à cozinha" onPress={control.send} />
+        <SalonSyncStatus />
+        <AppButton
+          label="Enviar à cozinha"
+          disabled={control.disabled || !control.count}
+          onPress={control.send}
+        />
         <AppButton
           label="Continuar editando"
           variant="secondary"

@@ -4,10 +4,10 @@ import {
   useBottomSheetModal,
   type BottomSheetModal,
 } from '@gorhom/bottom-sheet';
-import { useWaiterDemo } from '@/contexts/WaiterDemoContext';
+import { useWaiter } from '@/contexts/WaiterContext';
 import { useToast } from '@/contexts/ToastContext';
 export function useOrders() {
-  const { state, dispatch } = useWaiterDemo();
+  const { state, mutate, disabled } = useWaiter();
   const { showToast } = useToast();
   const { dismissAll } = useBottomSheetModal();
   const [filter, setFilter] = useState('all');
@@ -25,6 +25,7 @@ export function useOrders() {
   }, [servingId]);
   useFocusEffect(useCallback(() => () => dismissAll(), [dismissAll]));
   return {
+    disabled,
     filter,
     draft,
     setDraft,
@@ -49,10 +50,17 @@ export function useOrders() {
     clearDetails: () => setSelectedId(null),
     askServe: (id: string) => setServingId(id),
     clearServe: () => setServingId(null),
-    serve: () => {
+    serve: async () => {
       const order = state.orders.find((order) => order.id === servingId);
-      if (order?.status !== 'ready') return;
-      dispatch({ type: 'serve', orderId: order.id });
+      if (disabled || order?.status !== 'ready') return;
+      if (
+        !(await mutate('serve', {
+          tableId: order.tableId,
+          tabId: order.tabId,
+          orderId: order.id,
+        }))
+      )
+        return;
       serveRef.current?.dismiss();
       showToast('Pedido marcado como servido. A comanda continua aberta.');
     },

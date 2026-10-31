@@ -1,20 +1,26 @@
 import { useState } from 'react';
-import { useWaiterDemo } from '@/contexts/WaiterDemoContext';
-import { orderTotal } from '@/mocks/waiter';
+import { useWaiter } from '@/contexts/WaiterContext';
 export function useTables() {
-  const { state } = useWaiterDemo();
+  const { state, loading } = useWaiter();
   const [filter, setFilter] = useState('all');
   const [search, setSearch] = useState('');
   const tables = state.tables.map((table) => {
     const orders = state.orders.filter((order) => order.tableId === table.id);
     return {
       ...table,
-      total: orders.reduce((sum, order) => sum + orderTotal(order), 0),
+      total: table.total,
       ready: orders.filter((order) => order.status === 'ready').length,
-      status: table.checkout ? 'checkout' : table.active ? 'occupied' : 'free',
+      status: table.cleaning
+        ? 'cleaning'
+        : table.checkout
+          ? 'checkout'
+          : table.active
+            ? 'occupied'
+            : 'free',
     };
   });
   return {
+    loading,
     tables,
     filter,
     setFilter,

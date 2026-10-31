@@ -6,11 +6,11 @@ import { PageHeader } from '@/components/PageHeader';
 import { AppText } from '@/components/ui/AppText';
 import { AppButton } from '@/components/ui/AppButton';
 import { BaseBottomSheet } from '@/components/BaseBottomSheet';
-import { PreviewNote } from '@/components/PreviewNote';
+import { SalonSyncStatus } from '@/components/SalonSyncStatus';
 import { useTableDetails } from '@/hooks/use-table-details';
 import { useAppNavigation } from '@/hooks/useAppNavigation';
 import type { RootStackParamList } from '@/types/navigation';
-import { money, orderStatuses } from '@/mocks/waiter';
+import { money, orderStatuses } from '@/utils/salon-state';
 export function TableDetailsScreen() {
   const { params } = useRoute<RouteProp<RootStackParamList, 'TableDetails'>>();
   const control = useTableDetails(params.tableId);
@@ -18,7 +18,8 @@ export function TableDetailsScreen() {
   if (!control.table)
     return (
       <Screen>
-        <PageHeader title="Mesa não encontrada." />
+        <PageHeader title="Mesa indisponível." />
+        <SalonSyncStatus />
       </Screen>
     );
   const table = control.table;
@@ -33,11 +34,25 @@ export function TableDetailsScreen() {
               : 'Abra a mesa para iniciar o atendimento.'
           }
         />
-        <PreviewNote />
-        {!table.active ? (
+        <SalonSyncStatus />
+        {table.cleaning ? (
+          <View className="mt-7">
+            <AppText variant="heading">Aguardando limpeza</AppText>
+            <AppText variant="muted" className="my-4">
+              A conta foi encerrada pelo caixa. Confirme somente depois de
+              preparar a mesa para outro atendimento.
+            </AppText>
+            <AppButton
+              label="Confirmar limpeza e liberar mesa"
+              disabled={control.disabled}
+              onPress={control.cleanTable}
+            />
+          </View>
+        ) : !table.active ? (
           <View className="mt-7">
             <AppButton
               label="Abrir mesa"
+              disabled={control.disabled}
               onPress={() => control.sheetRef.current?.present()}
             />
           </View>
@@ -58,7 +73,7 @@ export function TableDetailsScreen() {
             </View>
             <AppButton
               label="Adicionar pedido"
-              disabled={table.checkout}
+              disabled={table.checkout || control.disabled}
               onPress={() =>
                 navigation.navigate('NewOrder', { tableId: table.id })
               }
@@ -139,7 +154,11 @@ export function TableDetailsScreen() {
             <Plus size={20} color="#0A0A0A" />
           </Pressable>
         </View>
-        <AppButton label="Confirmar abertura" onPress={control.openTable} />
+        <AppButton
+          label="Confirmar abertura"
+          disabled={control.disabled}
+          onPress={control.openTable}
+        />
         <AppButton
           label="Cancelar"
           variant="secondary"

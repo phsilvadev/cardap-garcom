@@ -3,7 +3,7 @@ import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { AppTheme } from '@/constants/theme';
 import { useAuth } from '@/contexts/AuthContext';
-import { WaiterDemoProvider } from '@/contexts/WaiterDemoContext';
+import { WaiterProvider } from '@/contexts/WaiterContext';
 import { BottomNavigation } from './BottomNavigation';
 import { LoginScreen } from '@/screens/auth/LoginScreen';
 import { AccessHelpScreen } from '@/screens/auth/AccessHelpScreen';
@@ -23,7 +23,7 @@ export function AppNavigator() {
   if (!session.user && session.hasIdentity) return <AccessIssueScreen />;
   return (
     <NavigationContainer theme={AppTheme}>
-      <WaiterDemoProvider
+      <WaiterProvider
         key={
           session.user ? `${session.user.uid}:${session.user.storeId}` : 'guest'
         }
@@ -54,7 +54,7 @@ export function AppNavigator() {
             )}
           </Stack.Navigator>
         </BottomSheetModalProvider>
-      </WaiterDemoProvider>
+      </WaiterProvider>
     </NavigationContainer>
   );
 }

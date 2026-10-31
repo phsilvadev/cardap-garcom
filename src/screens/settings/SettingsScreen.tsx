@@ -58,8 +58,8 @@ export function SettingsScreen() {
         },
         {
           icon: ChartNoAxesCombined,
-          label: 'Meu atendimento',
-          description: 'Mesas e pedidos atendidos',
+          label: 'Atendimento do salão',
+          description: 'Mesas e pedidos atuais do restaurante',
           screen: 'Progress' as const,
         },
         {
